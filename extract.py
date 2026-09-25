@@ -7,6 +7,7 @@ import logging
 import zipfile
 import gzip
 import json
+import shutil
 
 #Choose the date to extract. Either 'yesterday' or input a specific date as a string
 chosenDate = 'yesterday'
@@ -136,5 +137,5 @@ for i in range (nAttempts):
         logger.error(f'Unknown error: {statusCode}')
         break # For unknown 300+ errors, break instead of retrying
 
-#TO DO:
-#- potentially could add...
+# Remove the zip directory
+shutil.rmtree('zip')
