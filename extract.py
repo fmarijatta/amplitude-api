@@ -9,7 +9,7 @@ import gzip
 import json
 
 #Choose the date to extract. Either 'yesterday' or input a specific date as a string
-chosenDate = '20260923'
+chosenDate = 'yesterday'
 
 if chosenDate == 'yesterday':
     daterange = (datetime.today() - timedelta(days = 1)).strftime('%Y%m%d')
