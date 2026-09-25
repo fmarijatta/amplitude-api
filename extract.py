@@ -23,16 +23,17 @@ params = {
     }
 
 # Define save and log directories
-timestamp = f'{params['start']}-{params['end']}'
+timestamp = f'{params['start']}-{params['end']}' #the name of the folder represents the data range
 
 zipDir = f'zip/{timestamp}'
-gzipDir = f'{zipDir}/gzip/'
 os.makedirs(zipDir, exist_ok = True)
+gzipDir = f'{zipDir}/gzip/'
 os.makedirs(gzipDir, exist_ok = True)
 saveDir = f'data/{timestamp}'
 os.makedirs(saveDir, exist_ok = True)
 logDir = 'log'
 os.makedirs(logDir, exist_ok = True)
+
 zipFilename = f'{zipDir}/amplitude_data_{timestamp}.zip'
 logFilename = f'{logDir}/amplitude_log_{timestamp}.json'
 
