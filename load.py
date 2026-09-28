@@ -42,9 +42,7 @@ s3_client = boto3.client('s3',
                   aws_secret_access_key = AWS_SECRET_KEY
                   )
 
-
-
-
+#Upload data if not already in s3 bucket
 dataDirs = os.listdir(loadDir)
 for dir in dataDirs:
     dataFilenames = os.listdir(f'{loadDir}/{dir}')
