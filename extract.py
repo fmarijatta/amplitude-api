@@ -48,7 +48,7 @@ logDir = 'log'
 os.makedirs(logDir, exist_ok = True)
 
 zipFilename = f'{zipDir}/amplitude_data_{timestamp}.zip'
-logFilename = f'{logDir}/amplitude_log_{timestamp}.log'
+logFilename = f'{logDir}/amplitude_extract_log_{timestamp}.log'
 
 # Configure logger
 logging.basicConfig(
@@ -95,9 +95,10 @@ for i in range (nAttempts):
                         try:
                             with gzip.open(gzFilename, 'rt') as f:
                                 gz_content = f.read() # Read the .gz file
+                                print(gz_content)
                                 try:
                                     with open(saveFilename, 'w') as file:
-                                        json.dump(gz_content, file) # Write the .json file
+                                        file.write(gz_content)
                                     logger.info(f'{filename} saved to data folder.')
                                 except Exception as e:
                                     print(f'A .gz write error has occurred: {e}')
