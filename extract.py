@@ -48,7 +48,7 @@ logDir = 'log'
 os.makedirs(logDir, exist_ok = True)
 
 zipFilename = f'{zipDir}/amplitude_data_{timestamp}.zip'
-logFilename = f'{logDir}/amplitude_log_{timestamp}.log'
+logFilename = f'{logDir}/amplitude_extract_log_{timestamp}.log'
 
 # Configure logger
 logging.basicConfig(
