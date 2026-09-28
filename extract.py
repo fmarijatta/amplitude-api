@@ -19,7 +19,7 @@ AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
 
 #Choose the date to extract. Either 'yesterday' or input a specific date as a string
-chosenDate = '20260922'
+chosenDate = '20260925'
 
 if chosenDate == 'yesterday':
     daterange = (datetime.today() - timedelta(days = 1)).strftime('%Y%m%d')
@@ -30,7 +30,6 @@ else:
     except:
         print("The variable chosenDate must be either 'yesterday' or a specific date structured as YYYYMMDD. Please change the variable and try again.")
 
-jsonFilename = datetime.strptime(daterange, '%Y%m%d').strftime('%Y-%m-%d')
 # Extract .env variables
 load_dotenv(override = True)
 api_key = os.getenv('AMP_API_KEY')
@@ -70,6 +69,8 @@ logger = logging.getLogger()
 logger.info('Logger successfully initialised.')
 
 #Get all files in bucket
+jsonFilename = datetime.strptime(daterange, '%Y%m%d').strftime('%Y-%m-%d')
+
 session = boto3.Session(aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
 s3 = session.resource('s3')
 my_bucket = s3.Bucket(AWS_BUCKET_NAME)
@@ -77,21 +78,21 @@ s3_files = []
 for obj in my_bucket.objects.all():
     s3file = obj.key
     if s3file.find(jsonFilename) != -1:
-        # s3_files.append(obj.key)
-        s3_files.append(int(s3file.split('.')[0].split('_')[-1]))
+        s3_files.append(int(s3file.split('.')[0].split('_')[-1])) #Should I add some try except error handling here?
 
-continueFlag = 0
+#Check whether any of the daterange's data is already in the s3 bucket
 if sorted(s3_files) == list(range(0,24)): 
     print(f'Data for {daterange} is already in the s3 bucket. API call aborted.')
     logging.info('Data for this date is already in the s3 bucket. API call aborted.')
+    continueFlag = 0
 elif s3_files != []:
     print(f'Warning: only partial data for {daterange} exists in s3 bucket. Reattempting API call.')
     logging.warning(f'Warning: only partial data for {daterange} exists in s3 bucket. Reattempting API call.')
-
     continueFlag = 1
 else:
     continueFlag = 1
 
+#If not already in s3, then attempt API call
 if continueFlag == 1:
     # Attempt API call
     for i in range (nAttempts):
