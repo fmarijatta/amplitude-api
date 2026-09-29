@@ -1,22 +1,16 @@
-import requests
 import os
-from datetime import timedelta
-from datetime import datetime
-from dotenv import load_dotenv
+import requests
 import logging
 import zipfile
 import gzip
-import json
 import shutil
 import boto3
+from datetime import timedelta
+from datetime import datetime
 from dotenv import load_dotenv
 
-#Load environmental variables
-load_dotenv(override = True)
 
-AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
-AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
-AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
+##---------------------------------------------------------------------------------------------
 
 #Choose the date to extract. Either 'yesterday' or input a specific date as a string
 chosenDate = '20260925'
@@ -30,10 +24,14 @@ else:
     except:
         print("The variable chosenDate must be either 'yesterday' or a specific date structured as YYYYMMDD. Please change the variable and try again.")
 
-# Extract .env variables
+#Load environmental variables
 load_dotenv(override = True)
-api_key = os.getenv('AMP_API_KEY')
-secret_key = os.getenv('AMP_SECRET_KEY')
+
+AMP_API_KEY = os.getenv('AMP_API_KEY')
+AMP_SECRET_KEY = os.getenv('AMP_SECRET_KEY')
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
 
 # Define API call variables
 url = 'https://analytics.eu.amplitude.com/api/2/export'
@@ -45,7 +43,7 @@ params = {
     }
 
 # Define save and log directories
-timestamp = f'{params['start']}-{params['end']}' #the name of the folder represents the data range
+timestamp = f'{params['start']}-{params['end']}' #the name of the folder reflects the date extracted
 
 zipDir = f'zip/{timestamp}'
 os.makedirs(zipDir, exist_ok = True)
@@ -68,35 +66,45 @@ logging.basicConfig(
 logger = logging.getLogger()
 logger.info('Logger successfully initialised.')
 
-#Get all files in bucket
-jsonFilename = datetime.strptime(daterange, '%Y%m%d').strftime('%Y-%m-%d')
 
-session = boto3.Session(aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
-s3 = session.resource('s3')
-my_bucket = s3.Bucket(AWS_BUCKET_NAME)
-s3_files = []
-for obj in my_bucket.objects.all():
-    s3file = obj.key
-    if s3file.find(jsonFilename) != -1:
-        s3_files.append(int(s3file.split('.')[0].split('_')[-1])) #Should I add some try except error handling here?
+##-----------------------------------------------------------------------------------------------
 
-#Check whether any of the daterange's data is already in the s3 bucket
-if sorted(s3_files) == list(range(0,24)): 
-    print(f'Data for {daterange} is already in the s3 bucket. API call aborted.')
-    logging.info('Data for this date is already in the s3 bucket. API call aborted.')
-    continueFlag = 0
-elif s3_files != []:
-    print(f'Warning: only partial data for {daterange} exists in s3 bucket. Reattempting API call.')
-    logging.warning(f'Warning: only partial data for {daterange} exists in s3 bucket. Reattempting API call.')
+#Obtain a list of files for this daterange in the s3 bucket
+s3Filename = datetime.strptime(daterange, '%Y%m%d').strftime('%Y-%m-%d')
+
+try:
+    session = boto3.Session(aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
+    s3 = session.resource('s3')
+    my_bucket = s3.Bucket(AWS_BUCKET_NAME)
+    s3_files = []
+    for obj in my_bucket.objects.all():
+        s3file = obj.key
+        if s3file.find(s3Filename) != -1:
+            s3_files.append(int(s3file.split('.')[0].split('_')[-1]))
+
+    #Check whether any of the daterange's data is already in the s3 bucket. We'd expect 24 files for one day, so numbered
+    if sorted(s3_files) == list(range(0,24)): 
+        print(f'Data for {daterange} is already in the s3 bucket. Data extraction aborted.')
+        logger.info('Data for this date is already in the s3 bucket. Data extraction aborted.')
+        continueFlag = 0
+    elif s3_files != []:
+        print(f'Warning: only partial data for {daterange} exists in s3 bucket. Reattempting API call.')
+        logger.warning(f'Warning: only partial data for {daterange} exists in s3 bucket. Data extraction will be attempted.')
+        continueFlag = 1
+    else:
+        continueFlag = 1
+except Exception as e:
+    print(f'Warning: could not read data already in s3 bucket. Data extraction will be attempted regardless. Error: {e}')
+    logger.error(f'Error while parsing s3 bucket: {e}')
     continueFlag = 1
-else:
-    continueFlag = 1
 
-#If not already in s3, then attempt API call
+#-------------------------------------------------------------------------------------------------
+
+#If daterange's data is either not in or incompletely in s3 (or if this could not verified either way), then attempt API call
 if continueFlag == 1:
-    # Attempt API call
+    # Perform call
     for i in range (nAttempts):
-        response = requests.get(url, params = params, auth = (api_key, secret_key))
+        response = requests.get(url, params = params, auth = (AMP_API_KEY, AMP_SECRET_KEY))
         statusCode = response.status_code
         #On success, extract and save data as .json
         if 200 <= statusCode < 300:
