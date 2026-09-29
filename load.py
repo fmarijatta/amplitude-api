@@ -1,6 +1,7 @@
 import os
 import boto3
 import logging
+import shutil
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -34,9 +35,8 @@ s3_client = boto3.client('s3',
                   aws_secret_access_key = AWS_SECRET_KEY
                   )
 
-#Upload data if not already in s3 bucket
-dataDirs = os.listdir(loadDir)
-for dir in dataDirs:
+#Upload data to s3 bucket
+for dir in os.listdir(loadDir):
     dataFilenames = os.listdir(f'{loadDir}/{dir}')
     for file in dataFilenames:
         filepath = f'{loadDir}/{dir}/{file}'
@@ -47,3 +47,6 @@ for dir in dataDirs:
         except Exception as e:
             print(f'An error has occurred: {e}')
             logging.error(f'{file} failed to upload: {e}')
+    print(f'All files from {dir} have been uploaded. Deleting directory...')
+    shutil.rmtree(dir) # Remove the entire directory after all files have been successfully uploaded
+print('UPLOAD COMPLETE.')
