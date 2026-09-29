@@ -43,10 +43,11 @@ for dir in os.listdir(loadDir):
         try:
             s3_client.upload_file(filepath, AWS_BUCKET_NAME, file)
             print(f'{file} successfully uploaded.')
-            logging.info(f'{file} successfully uploaded.')
+            logger.info(f'{file} successfully uploaded.')
         except Exception as e:
             print(f'An error has occurred: {e}')
-            logging.error(f'{file} failed to upload: {e}')
-    print(f'All files from {dir} have been uploaded. Deleting directory...')
+            logger.error(f'{file} failed to upload: {e}')
+    print(f'All files from {dir} have been uploaded. Deleting directory.')
+    logger.info(f'All files from {dir} have been uploaded. Directory deleted.')
     shutil.rmtree(dir) # Remove the entire directory after all files have been successfully uploaded
 print('UPLOAD COMPLETE.')
