@@ -169,5 +169,5 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
                 logger.error(f'Unknown error: {statusCode}')
                 break # For unknown 300+ errors, break instead of retrying
 
-    # # Remove the zip directory
-    # shutil.rmtree('zip')
+    # Remove the zip directory
+    shutil.rmtree('zip')

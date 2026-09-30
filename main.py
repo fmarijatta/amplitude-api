@@ -1,6 +1,7 @@
 import os
 from modules.log_initialise import setup_logger
 from modules.extract_api import extract_json
+from modules. upload_data import upload_to_s3
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -11,7 +12,7 @@ chosenDate = '20260918'#
 url = 'https://analytics.eu.amplitude.com/api/2/export'
 # nAttempts = 15
 # delay = 10
-saveDir = f'data/{chosenDate}'
+dataDir = f'data/{chosenDate}'
 logDir = 'log'
 
 #Load environmental variables
@@ -27,7 +28,10 @@ logger = setup_logger(chosenDate, logDir)
 logger.info('Logger successfully initialised.')
 
 #Extract data
-extract_json(chosenDate, url, AMP_API_KEY, AMP_SECRET_KEY, AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_BUCKET_NAME, saveDir)
+extract_json(chosenDate, url, AMP_API_KEY, AMP_SECRET_KEY, AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_BUCKET_NAME, dataDir)
+
+#Upload data to s3
+upload_to_s3(AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_BUCKET_NAME, dataDir)
 
 
 
