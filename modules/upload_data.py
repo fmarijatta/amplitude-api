@@ -6,7 +6,16 @@ from dotenv import load_dotenv
 from datetime import datetime
 from modules.log_initialise import setup_logger
 
-def upload_to_s3(aws_access_key, aws_secret_key, aws_bucket_name, loadDir):
+def upload_to_s3(aws_access_key:str, aws_secret_key:str, aws_bucket_name:str, loadDir:str):
+    """_summary_
+
+    Args:
+        aws_access_key (str): AWS access key
+        aws_secret_key (str): AWS secret key
+        aws_bucket_name (str): AWS bucket name
+        loadDir (str): where to load the data from, to be uploaded to s3
+    """
+
     logger = logging.getLogger(__name__)
 
     # Initialise s3 client
