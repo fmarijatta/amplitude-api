@@ -44,12 +44,11 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
         }
     
     #Create temporary directories for zip and gzip files
-    timestamp = f'{params['start']}-{params['end']}' #the name of the folder reflects the date extracted (chosenDate)
-    zipDir = f'zip/{timestamp}'
+    zipDir = f'zip/{daterange}'
     os.makedirs(zipDir, exist_ok = True)
     gzipDir = f'{zipDir}/gzip/'
     os.makedirs(gzipDir, exist_ok = True)
-    zipFilename = f'{zipDir}/amplitude_data_{timestamp}.zip'
+    zipFilename = f'{zipDir}/amplitude_data_{daterange}.zip'
 
     ###Compare planned extraction to existing files in S3 bucket
 
