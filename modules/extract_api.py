@@ -49,6 +49,7 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
     gzipDir = f'{zipDir}/gzip/'
     os.makedirs(gzipDir, exist_ok = True)
     zipFilename = f'{zipDir}/amplitude_data_{daterange}.zip'
+    os.makedirs(f'{saveDir}', exist_ok = True)
 
     ###Compare planned extraction to existing files in S3 bucket
 
@@ -80,6 +81,8 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
         print(f'Warning: could not read data already in s3 bucket. Data extraction will be attempted regardless. Error: {e}')
         logger.error(f'Error while parsing s3 bucket: {e}')
         continueFlag = 1
+
+    logger.debug('S3 check complete.')
 
     ### API call
 
@@ -121,13 +124,14 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
                                 try:
                                     with gzip.open(gzFilename, 'rt') as f:
                                         gz_content = f.read() # Read the .gz file
-                                        print(gz_content)
                                         try:
                                             with open(saveFilename, 'w') as file:
                                                 file.write(gz_content)
                                             logger.info(f'{filename} saved to data folder.')
                                         except Exception as e:
                                             print(f'A .gz write error has occurred: {e}')
+                                            logger.debug(f'gzFilename = {gzFilename}')
+                                            logger.debug(f'saveFilename = {saveFilename}')
                                             logger.error(f'A .gz write error has occurred: {e}')
                                 except Exception as e:
                                     print(f'A .gz read error has occurred: {e}')
@@ -165,5 +169,5 @@ def extract_json(chosenDate:str, url:str, amp_api_key:str, amp_secret_key:str, a
                 logger.error(f'Unknown error: {statusCode}')
                 break # For unknown 300+ errors, break instead of retrying
 
-    # Remove the zip directory
-    shutil.rmtree('zip')
+    # # Remove the zip directory
+    # shutil.rmtree('zip')
