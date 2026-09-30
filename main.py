@@ -24,7 +24,7 @@ AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME')
 
 #Initialise logger
 logger = setup_logger(chosenDate, logDir)
-logger.info('test')
+logger.info('Logger successfully initialised.')
 
 #Extract data
 extract_json(chosenDate, url, AMP_API_KEY, AMP_SECRET_KEY, AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_BUCKET_NAME, saveDir)
